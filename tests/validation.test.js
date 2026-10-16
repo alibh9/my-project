@@ -40,6 +40,9 @@ test('توحيد أرقام الجوال', () => {
   assert.equal(normalizePhone('0555 555 555', '966'), '+966555555555');
   assert.equal(normalizePhone('+966 55-555-5555', '966'), '+966555555555');
   assert.equal(normalizePhone('00966555555555', '966'), '+966555555555');
+  assert.equal(normalizePhone('966555555555', '966'), '+966555555555', 'كود الدولة بدون +');
+  assert.equal(normalizePhone('38068883', '966'), '+96638068883', 'رقم محلي بلا صفر يأخذ كود الدولة');
+  assert.equal(normalizePhone('555555555', '966'), '+966555555555');
   assert.equal(normalizePhone('12', '966'), null);
   assert.equal(normalizePhone('abc', '966'), null);
   assert.equal(normalizePhone('', '966'), null);

@@ -35,8 +35,11 @@ function normalizePhone(raw, defaultCountryCode) {
     digits = digits.slice(1);
   } else if (digits.startsWith('00')) {
     digits = digits.slice(2);
-  } else if (digits.startsWith('0')) {
-    digits = defaultCountryCode + digits.slice(1);
+  } else if (digits.startsWith(defaultCountryCode) && digits.length >= defaultCountryCode.length + 8) {
+    // رقم مكتوب بكود الدولة دون + (مثل 966555555555)
+  } else {
+    // رقم محلي: نزيل الصفر الأول ونضيف كود الدولة الافتراضي (0555… أو 555…)
+    digits = defaultCountryCode + digits.replace(/^0/, '');
   }
   if (!/^[1-9]\d{7,14}$/.test(digits)) return null;
   return `+${digits}`;
