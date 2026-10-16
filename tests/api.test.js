@@ -94,6 +94,8 @@ test('الحجز يُقبل بتحدٍّ صحيح ويرسل إشعارات ال
   assert.match(data.booking.mapUrl, /maps\?q=21\.543333,39\.172778/);
   assert.equal(data.notifications.customer, true);
   assert.equal(data.notifications.technician, true);
+  const stored = s.db.prepare('SELECT notify_status FROM bookings WHERE reference = ?').get(data.booking.reference);
+  assert.equal(stored.notify_status, 'customer=ok;owner=ok;technician=ok');
   assert.ok(s.sent.some((m) => m.to === '+966500000001'), 'رسالة للعميل');
   assert.ok(s.sent.some((m) => m.to === TECH_PHONE), 'رسالة للفني');
 });

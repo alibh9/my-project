@@ -88,6 +88,17 @@
     return state.acTypes.find((t) => t.id === id)?.label ?? id;
   }
 
+  // يحوّل "customer=ok;owner=failed" إلى سطر عربي مقروء
+  function notifyLine(summary) {
+    const names = { customer: 'العميل', owner: 'المحل', technician: 'الفني' };
+    const states = { ok: '✓', failed: '✗ فشل', skipped: '—' };
+    const parts = summary.split(';').map((pair) => {
+      const [key, state] = pair.split('=');
+      return `${names[key] ?? key} ${states[state] ?? state}`;
+    });
+    return el('span', { class: 'small-text', title: 'حالة إرسال واتساب' }, `واتساب: ${parts.join('، ')}`);
+  }
+
   function technicianSelect(booking) {
     const sel = el('select', { 'aria-label': `فني الحجز ${booking.reference}` });
     sel.append(option('', 'تلقائي (أول فني متاح)', booking.technicianId == null));
@@ -105,6 +116,7 @@
     refCell.append(el('strong', { class: 'dir-ltr' }, booking.reference));
     refCell.append(el('span', { class: 'small-text' }, `أُنشئ: ${booking.createdAt.slice(0, 16).replace('T', ' ')}`));
     if (booking.reminderSent) refCell.append(el('span', { class: 'badge reminded' }, 'تم التذكير'));
+    if (booking.notifyStatus) refCell.append(notifyLine(booking.notifyStatus));
 
     // الموعد: تاريخ + ساعة قابلة للتعديل
     const dateCell = el('td');

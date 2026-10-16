@@ -3,10 +3,10 @@
 const path = require('node:path');
 const express = require('express');
 const { SLOTS, AC_TYPES, isRealDate, shopDateOf, slotLabel, acTypeLabel } = require('./domain');
-const { BookingError, createBooking, dayAvailability, monthAvailability } = require('./bookings');
+const { BookingError, createBooking, dayAvailability, monthAvailability, setNotifyStatus } = require('./bookings');
 const { validateBookingInput } = require('./validation');
 const { createCaptcha, verifyCaptcha, createRateLimiter, securityHeaders, basicAuth } = require('./security');
-const { notifyBookingConfirmed, mapLink } = require('./notifications');
+const { notifyBookingConfirmed, summarizeNotifications, mapLink } = require('./notifications');
 const { adminRouter } = require('./admin-routes');
 
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -92,6 +92,7 @@ function createApp({ db, config, notifier, logger = console, now = () => new Dat
 
     const booking = createBooking(db, input, { now: now(), config });
     const notifications = await notifyBookingConfirmed(booking, { notifier, config });
+    setNotifyStatus(db, booking.id, summarizeNotifications(notifications));
     logger.info(`[booking] تم الحجز ${booking.reference} ${booking.date} ${booking.slot}`);
 
     return res.status(201).json({ booking: publicBookingView(booking), notifications });

@@ -2,7 +2,15 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+// node:sqlite تطلق تحذيراً تجريبياً عند التحميل في Node 22. نُسكت هذا التحذير تحديداً فقط
+const originalEmitWarning = process.emitWarning;
+process.emitWarning = function emitWarningFiltered(warning, ...rest) {
+  const message = typeof warning === 'string' ? warning : warning?.message;
+  if (/SQLite is an experimental feature/.test(String(message))) return;
+  return originalEmitWarning.call(process, warning, ...rest);
+};
 const { DatabaseSync } = require('node:sqlite');
+process.emitWarning = originalEmitWarning;
 
 const SCHEMA = `
   CREATE TABLE IF NOT EXISTS technicians (
@@ -28,6 +36,7 @@ const SCHEMA = `
     technician_id     INTEGER REFERENCES technicians(id),
     status            TEXT    NOT NULL DEFAULT 'confirmed',
     reminder_sent     INTEGER NOT NULL DEFAULT 0,
+    notify_status     TEXT    NOT NULL DEFAULT '',
     created_at        TEXT    NOT NULL,
     updated_at        TEXT    NOT NULL
   );
@@ -50,6 +59,11 @@ function openDatabase(filePath) {
   db.exec('PRAGMA foreign_keys = ON;');
   db.exec('PRAGMA busy_timeout = 5000;');
   db.exec(SCHEMA);
+  // ترحيل لقواعد أُنشئت قبل إضافة العمود
+  const columns = db.prepare('PRAGMA table_info(bookings)').all().map((c) => c.name);
+  if (!columns.includes('notify_status')) {
+    db.exec("ALTER TABLE bookings ADD COLUMN notify_status TEXT NOT NULL DEFAULT ''");
+  }
   return db;
 }
 

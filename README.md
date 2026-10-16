@@ -46,7 +46,14 @@ node --env-file=.env server/index.js
 - `twilio`: يحتاج `TWILIO_ACCOUNT_SID` و`TWILIO_AUTH_TOKEN` و`TWILIO_WHATSAPP_FROM`.
 - `meta`: WhatsApp Cloud API ويحتاج `META_WHATSAPP_PHONE_NUMBER_ID` و`META_WHATSAPP_TOKEN`.
 
-**ملاحظة:** واتساب لا يسمح برسائل تبدأ بها أنت (business-initiated) خارج نافذة 24 ساعة إلا عبر **قوالب معتمدة**. الكود الحالي يرسل نصاً حراً، وهذا يعمل ضمن نافذة 24 ساعة فقط. للإنتاج، أنشئ قوالب معتمدة وعدّل الإرسال في `server/notifications.js`.
+**ملاحظة:** واتساب لا يسمح برسائل تبدأ بها أنت (business-initiated) خارج نافذة 24 ساعة إلا عبر **قوالب معتمدة**.
+
+لإرسال تأكيد الحجز عبر قالب Meta المعتمد:
+
+1. أنشئ قالباً في Meta Business Manager بسبعة متغيرات في النص بالترتيب: الاسم، رقم الحجز، التاريخ، الموعد، نوع المكيف، العنوان، رابط الخريطة.
+2. بعد اعتماده اضبط `META_TEMPLATE_CUSTOMER_CONFIRMATION` باسم القالب و`META_TEMPLATE_LANGUAGE` بلغته (مثلاً `ar`).
+
+إن لم يُضبط اسم القالب يُرسل نص حر، وهذا يعمل ضمن نافذة 24 ساعة فقط. تُحفظ حالة كل إرسال في الحجز (`notify_status`) وتظهر في لوحة الإدارة.
 
 ## البنية
 

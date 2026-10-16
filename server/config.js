@@ -44,6 +44,11 @@ function loadConfig(env = process.env) {
         phoneNumberId: env.META_WHATSAPP_PHONE_NUMBER_ID || '',
         token: env.META_WHATSAPP_TOKEN || '',
         apiVersion: env.META_GRAPH_API_VERSION || 'v21.0',
+        // قالب معتمد لرسالة تأكيد الحجز. إن لم يُضبط يُرسل نص حر (يعمل داخل نافذة 24 ساعة فقط)
+        templates: {
+          customerConfirmation: env.META_TEMPLATE_CUSTOMER_CONFIRMATION || '',
+          language: env.META_TEMPLATE_LANGUAGE || 'ar',
+        },
       },
     },
   };

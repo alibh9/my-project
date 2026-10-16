@@ -102,22 +102,61 @@ function createTwilioProvider({ accountSid, authToken, from }) {
   };
 }
 
-// ملاحظة: خارج نافذة الـ 24 ساعة يتطلب واتساب قالباً معتمداً (template)
+// قيم القالب لا تقبل أسطراً أو تبويبات أو أكثر من مسافتين متتاليتين في واتساب
+function sanitizeTemplateValue(value) {
+  return String(value ?? '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/ {2,}/g, ' ')
+    .trim()
+    .slice(0, 1024);
+}
+
+// ملاحظة: خارج نافذة الـ 24 ساعة لا يُرسل واتساب إلا قالباً معتمداً، لذلك نفضّل القالب متى ضُبط اسمه
+function buildMetaPayload(to, text, template) {
+  const base = { messaging_product: 'whatsapp', to: to.replace(/\D/g, '') };
+  if (template?.name) {
+    return {
+      ...base,
+      type: 'template',
+      template: {
+        name: template.name,
+        language: { code: template.language || 'ar' },
+        components: [
+          {
+            type: 'body',
+            parameters: template.variables.map((v) => ({ type: 'text', text: sanitizeTemplateValue(v) })),
+          },
+        ],
+      },
+    };
+  }
+  return { ...base, type: 'text', text: { body: text, preview_url: true } };
+}
+
 function createMetaProvider({ phoneNumberId, token, apiVersion }) {
   return {
     name: 'meta',
-    async send(to, text) {
+    async send(to, text, template) {
       await postJson(`https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`, {
         headers: { Authorization: `Bearer ${token}` },
-        body: {
-          messaging_product: 'whatsapp',
-          to: to.replace(/\D/g, ''),
-          type: 'text',
-          text: { body: text, preview_url: true },
-        },
+        body: buildMetaPayload(to, text, template),
       });
     },
   };
+}
+
+// متغيرات قالب تأكيد الحجز بالترتيب: {{1}} الاسم، {{2}} الرقم، {{3}} التاريخ، {{4}} الموعد،
+// {{5}} نوع المكيف، {{6}} العنوان، {{7}} رابط الخريطة
+function customerTemplateVariables(booking) {
+  return [
+    booking.customerName,
+    booking.reference,
+    booking.date,
+    slotLabel(booking.slot),
+    acTypeLabel(booking.acType),
+    booking.address,
+    mapLink(booking),
+  ];
 }
 
 function createNotifier(whatsappConfig, logger = console) {
@@ -140,10 +179,10 @@ function createNotifier(whatsappConfig, logger = console) {
   // يعيد true/false ولا يرمي: فشل الرسالة لا يجب أن يُفشل الحجز نفسه
   return {
     provider: impl.name,
-    async send(to, text) {
+    async send(to, text, template) {
       if (!to) return false;
       try {
-        await impl.send(to, text);
+        await impl.send(to, text, template);
         return true;
       } catch (error) {
         logger.error(`[whatsapp:${impl.name}] فشل الإرسال إلى ${to}: ${error.message}`);
@@ -155,8 +194,13 @@ function createNotifier(whatsappConfig, logger = console) {
 
 // يرسل إشعارات إتمام الحجز: العميل + صاحب المحل + الفني المعني
 async function notifyBookingConfirmed(booking, { notifier, config }) {
+  const template = {
+    name: config.whatsapp.meta.templates?.customerConfirmation || '',
+    language: config.whatsapp.meta.templates?.language,
+    variables: customerTemplateVariables(booking),
+  };
   const [customer, owner, technician] = await Promise.all([
-    notifier.send(booking.customerPhone, customerMessage(booking, config.shop.name)),
+    notifier.send(booking.customerPhone, customerMessage(booking, config.shop.name), template),
     notifier.send(config.ownerPhone, ownerMessage(booking)),
     booking.technicianPhone
       ? notifier.send(booking.technicianPhone, technicianMessage(booking))
@@ -169,12 +213,22 @@ async function notifyBookingConfirmed(booking, { notifier, config }) {
   };
 }
 
+// نص قصير يُحفظ في الحجز ويُعرض في اللوحة: customer=ok;owner=skipped;technician=failed
+function summarizeNotifications(result) {
+  const label = (v) => (v === null || v === undefined ? 'skipped' : v ? 'ok' : 'failed');
+  return ['customer', 'owner', 'technician'].map((k) => `${k}=${label(result[k])}`).join(';');
+}
+
 module.exports = {
   mapLink,
   customerMessage,
   ownerMessage,
   technicianMessage,
   reminderMessage,
+  customerTemplateVariables,
+  buildMetaPayload,
+  sanitizeTemplateValue,
   createNotifier,
   notifyBookingConfirmed,
+  summarizeNotifications,
 };

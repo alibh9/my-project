@@ -40,6 +40,7 @@ function mapRow(row) {
     technicianPhone: row.technician_phone ?? null,
     status: row.status,
     reminderSent: row.reminder_sent === 1,
+    notifyStatus: row.notify_status ?? '',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -328,6 +329,10 @@ function confirmedBookingsBetween(db, from, to) {
     .map(mapRow);
 }
 
+function setNotifyStatus(db, id, summary) {
+  db.prepare('UPDATE bookings SET notify_status = ? WHERE id = ?').run(summary, id);
+}
+
 function markReminderSent(db, id) {
   db.prepare('UPDATE bookings SET reminder_sent = 1 WHERE id = ?').run(id);
 }
@@ -342,5 +347,6 @@ module.exports = {
   monthAvailability,
   confirmedBookingsBetween,
   markReminderSent,
+  setNotifyStatus,
   activeTechnicians,
 };
