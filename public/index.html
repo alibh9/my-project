@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="احجز موعد صيانة أو تركيب مكيف بسهولة: اختر النوع واليوم والموعد وأرسل بياناتك.">
+  <meta name="theme-color" content="#0b6bcb">
+  <title>حجز موعد مكيف</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#bookingForm">تخطي إلى النموذج</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">❄</span>
+      <span id="shopName">مركز المكيفات</span>
+    </div>
+    <button type="button" id="installBtn" class="ghost" hidden>تثبيت التطبيق</button>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>احجز موعد الصيانة أو التركيب</h1>
+      <p>اختر نوع المكيف واليوم والموعد، وسنرسل تأكيد الحجز إلى واتساب.</p>
+    </section>
+
+    <form id="bookingForm" class="booking" novalidate>
+      <!-- 1. نوع المكيف -->
+      <fieldset class="card step" aria-describedby="err-acType">
+        <legend><span class="step-no">1</span> نوع المكيف</legend>
+        <div id="acTypes" class="ac-grid" role="radiogroup" aria-label="نوع المكيف"></div>
+        <p class="error" id="err-acType" hidden></p>
+      </fieldset>
+
+      <!-- 2. التقويم والموعد -->
+      <fieldset class="card step" aria-describedby="err-date err-slot">
+        <legend><span class="step-no">2</span> اليوم والموعد</legend>
+
+        <div class="cal-head">
+          <button type="button" class="icon-btn" id="prevMonth" aria-label="الشهر السابق">›</button>
+          <h2 id="monthTitle" aria-live="polite"></h2>
+          <button type="button" class="icon-btn" id="nextMonth" aria-label="الشهر التالي">‹</button>
+        </div>
+
+        <div class="weekdays" id="weekdays" aria-hidden="true"></div>
+        <div class="calendar" id="calendar" role="group" aria-label="أيام الشهر"></div>
+
+        <ul class="legend" aria-label="دلالات الألوان">
+          <li><span class="dot free"></span> متاح</li>
+          <li><span class="dot partial"></span> محجوز جزئياً</li>
+          <li><span class="dot full"></span> ممتلئ</li>
+          <li><span class="dot past"></span> غير متاح</li>
+        </ul>
+
+        <p class="error" id="err-date" hidden></p>
+
+        <div class="slots-wrap" id="slotsWrap" hidden>
+          <h3 id="slotsTitle"></h3>
+          <div id="slots" class="slots" role="radiogroup" aria-label="المواعيد"></div>
+          <p class="slot-note" id="slotNote" hidden></p>
+        </div>
+        <p class="error" id="err-slot" hidden></p>
+      </fieldset>
+
+      <!-- 3. البيانات -->
+      <fieldset class="card step" id="detailsStep">
+        <legend><span class="step-no">3</span> بياناتك</legend>
+
+        <div class="field">
+          <label for="customerName">الاسم الكامل</label>
+          <input id="customerName" name="customerName" autocomplete="name" required maxlength="80">
+          <p class="error" id="err-customerName" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="customerPhone">رقم الجوال (واتساب)</label>
+          <input id="customerPhone" name="customerPhone" type="tel" inputmode="tel" autocomplete="tel"
+                 placeholder="05xxxxxxxx أو +9665xxxxxxxx" dir="ltr" required>
+          <p class="error" id="err-customerPhone" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="address">العنوان التفصيلي</label>
+          <textarea id="address" name="address" rows="3" maxlength="300"
+                    placeholder="الحي، الشارع، رقم المبنى، الدور والشقة"></textarea>
+          <p class="error" id="err-address" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="location">الموقع (إحداثيات GPS)</label>
+          <div class="input-row">
+            <input id="location" name="location" dir="ltr" inputmode="decimal"
+                   placeholder="24.713600, 46.675300">
+            <button type="button" class="ghost" id="copyCoordsBtn" aria-label="نسخ الإحداثيات">نسخ</button>
+          </div>
+          <div class="actions-inline">
+            <button type="button" class="ghost" id="geoBtn">📍 استخدم موقعي الحالي</button>
+            <a id="mapLink" class="link" href="#" target="_blank" rel="noopener" hidden>فتح في الخرائط</a>
+          </div>
+          <p class="hint">يمكنك لصق إحداثيات أو رابط من خرائط Google.</p>
+          <p class="error" id="err-location" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="notes">ملاحظات <span class="muted">(اختياري)</span></label>
+          <textarea id="notes" name="notes" rows="2" maxlength="500"
+                    placeholder="مثال: المكيف لا يبرد، أو يلزم تركيب جديد"></textarea>
+          <p class="error" id="err-notes" hidden></p>
+        </div>
+
+        <div class="field captcha-field">
+          <label for="captchaAnswer">تحقق أنك إنسان</label>
+          <div class="input-row">
+            <span id="captchaQuestion" class="captcha-q" aria-live="polite">...</span>
+            <input id="captchaAnswer" name="captchaAnswer" inputmode="numeric" autocomplete="off" required>
+            <button type="button" class="ghost" id="captchaRefresh" aria-label="سؤال تحقق جديد">↻</button>
+          </div>
+          <p class="error" id="err-captcha" hidden></p>
+        </div>
+
+        <!-- مصيدة روبوتات: مخفية عن البشر -->
+        <div class="hp" aria-hidden="true">
+          <label for="website">لا تملأ هذا الحقل</label>
+          <input id="website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <p class="summary" id="summary" hidden></p>
+        <p class="form-error" id="formError" role="alert" hidden></p>
+
+        <button type="submit" class="primary" id="submitBtn">تأكيد الحجز</button>
+      </fieldset>
+    </form>
+
+    <section class="card success" id="success" hidden aria-live="polite" tabindex="-1">
+      <div class="success-mark" aria-hidden="true">✓</div>
+      <h2>تم تأكيد حجزك</h2>
+      <p>رقم الحجز: <strong id="successRef" dir="ltr"></strong></p>
+      <p id="successSummary"></p>
+      <p id="successNotify" class="muted"></p>
+      <div class="actions-inline">
+        <a id="successMap" class="link" target="_blank" rel="noopener">عرض الموقع على الخريطة</a>
+      </div>
+      <button type="button" class="primary" id="newBookingBtn">حجز جديد</button>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span id="footerShop"></span>
+    <span id="footerPhone" dir="ltr"></span>
+  </footer>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

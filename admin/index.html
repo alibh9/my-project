@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>لوحة الإدارة - الحجوزات</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body class="admin">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">❄</span>
+      <span>لوحة الإدارة</span>
+    </div>
+    <a class="link" href="/">الموقع العام</a>
+  </header>
+
+  <main class="container wide">
+    <p id="globalError" class="form-error" role="alert" hidden></p>
+
+    <!-- ====== التقرير اليومي ====== -->
+    <section class="card" aria-labelledby="reportTitle">
+      <div class="section-head">
+        <h2 id="reportTitle">التقرير اليومي</h2>
+        <div class="inline-form">
+          <input type="date" id="reportDate" aria-label="تاريخ التقرير">
+          <button type="button" class="ghost" id="reportBtn">عرض</button>
+        </div>
+      </div>
+      <div class="stats" id="reportStats"></div>
+      <div class="report-grid">
+        <div>
+          <h3>حسب الموعد</h3>
+          <ul class="plain" id="reportSlots"></ul>
+        </div>
+        <div>
+          <h3>حسب نوع المكيف</h3>
+          <ul class="plain" id="reportAc"></ul>
+        </div>
+        <div>
+          <h3>حسب الفني</h3>
+          <ul class="plain" id="reportTech"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== الحجوزات ====== -->
+    <section class="card" aria-labelledby="bookingsTitle">
+      <div class="section-head">
+        <h2 id="bookingsTitle">الحجوزات</h2>
+        <div class="actions-inline">
+          <button type="button" class="ghost" id="remindersBtn">تشغيل التذكيرات الآن</button>
+          <a class="ghost btn-link" id="exportLink" href="#">تصدير CSV</a>
+        </div>
+      </div>
+
+      <form class="filters" id="filters">
+        <label>من <input type="date" name="from"></label>
+        <label>إلى <input type="date" name="to"></label>
+        <label>الحالة
+          <select name="status">
+            <option value="">الكل</option>
+            <option value="confirmed">مؤكد</option>
+            <option value="completed">مكتمل</option>
+            <option value="cancelled">ملغي</option>
+          </select>
+        </label>
+        <label>الفني
+          <select name="technicianId" id="filterTech"><option value="">الكل</option></select>
+        </label>
+        <button type="submit" class="primary small">تطبيق</button>
+      </form>
+
+      <p class="muted" id="bookingsCount"></p>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">المرجع</th>
+              <th scope="col">الموعد</th>
+              <th scope="col">العميل</th>
+              <th scope="col">المكيف والعنوان</th>
+              <th scope="col">الفني</th>
+              <th scope="col">الحالة</th>
+              <th scope="col"><span class="sr-only">إجراء</span></th>
+            </tr>
+          </thead>
+          <tbody id="bookingsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ====== الفنيون ====== -->
+    <section class="card" aria-labelledby="techTitle">
+      <div class="section-head">
+        <h2 id="techTitle">الفنيون</h2>
+      </div>
+      <form class="inline-form wrap" id="techForm">
+        <input name="name" placeholder="اسم الفني" required minlength="2" maxlength="80" aria-label="اسم الفني">
+        <input name="phone" placeholder="الجوال" dir="ltr" required aria-label="جوال الفني">
+        <button type="submit" class="primary small">إضافة فني</button>
+      </form>
+      <p class="hint">الفني النشط يُسنَد له الحجز تلقائياً. عدد الفنيين النشطين = عدد الحجوزات المتزامنة في الموعد الواحد.</p>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th scope="col">الاسم</th><th scope="col">الجوال</th><th scope="col">نشط</th><th scope="col"><span class="sr-only">إجراء</span></th></tr>
+          </thead>
+          <tbody id="techBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/admin/admin.js" defer></script>
+</body>
+</html>
