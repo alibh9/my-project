@@ -1,0 +1,21 @@
+{
+  "scenes": [
+    {
+      "text": "مرحبا بك\nهذا فيديو تجريبي",
+      "color": "0x1e3a8a",
+      "duration": 3
+    },
+    {
+      "text": "صورة مع حركة زوم بطيئة",
+      "image": "assets/background.png",
+      "zoom": 1.15,
+      "duration": 4
+    },
+    {
+      "text": "اشترك الآن",
+      "color": "0xb91c1c",
+      "duration": 3
+    }
+  ],
+  "music": "assets/music.mp3"
+}
