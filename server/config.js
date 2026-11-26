@@ -17,6 +17,8 @@ function loadConfig(env = process.env) {
     port: Number(env.PORT) || 3000,
     shop: {
       name: env.SHOP_NAME || 'مركز المكيفات',
+      // الاسم القانوني كما في السجل التجاري. Meta تتحقق منه في الموقع عند توثيق النشاط
+      legalName: env.SHOP_LEGAL_NAME || '',
       phone: env.SHOP_PHONE || '',
     },
     timezoneOffset: offset,

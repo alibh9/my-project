@@ -465,6 +465,11 @@
     $('#shopName').textContent = shopName;
     $('#footerShop').textContent = shopName;
     if (state.config.shop.phone) $('#footerPhone').textContent = state.config.shop.phone;
+    if (state.config.shop.legalName) {
+      const legal = $('#footerLegal');
+      legal.textContent = state.config.shop.legalName;
+      legal.hidden = false;
+    }
 
     const [y, m] = state.config.today.split('-').map(Number);
     state.month = { year: y, month: m };
